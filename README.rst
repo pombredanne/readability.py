@@ -1,14 +1,14 @@
-Readability.py - another readability Python port
-==============================================
-.. image:: https://api.travis-ci.org/miso-belica/readability.py.png?branch=master
-   :target: https://travis-ci.org/miso-belica/readability.py
+breadability - another readability Python (v2.6-v3.3) port
+===========================================================
+.. image:: https://api.travis-ci.org/bookieio/breadability.png?branch=master
+   :target: https://travis-ci.org/bookieio/breadability.py
 
 I've tried to work with the various forks of some ancient codebase that ported
 `readability`_ to Python. The lack of tests, unused regex's, and commented out
 sections of code in other Python ports just drove me nuts.
 
 I put forth an effort to bring in several of the better forks into one
-codebase, but they've diverged so much that I just can't work with it.
+code base, but they've diverged so much that I just can't work with it.
 
 So what's any sane person to do? Re-port it with my own repo, add some tests,
 infrastructure, and try to make this port better. OSS FTW (and yea, NIH FML,
@@ -19,8 +19,12 @@ This is a pretty straight port of the JS here:
 - http://code.google.com/p/arc90labs-readability/source/browse/trunk/js/readability.js#82
 - http://www.minvolai.com/blog/decruft-arc90s-readability-in-python/
 
-Some other ports:
 
+Alternatives
+------------
+
+- https://github.com/codelucas/newspaper
+- https://github.com/grangier/python-goose
 - https://github.com/aidanf/BTE
 - http://www.unixuser.org/~euske/python/webstemmer/#extract
 - https://github.com/al3xandru/readability.py
@@ -45,14 +49,13 @@ things from pip so that it can compile.
 .. code-block:: bash
 
     $ [sudo] apt-get install libxml2-dev libxslt-dev
-    $ [sudo] pip install git+git://github.com/miso-belica/readability.py.git
+    $ [sudo] pip install git+git://github.com/bookieio/breadability.git
 
 Tests
 -----
 .. code-block:: bash
 
-    $ nosetests --with-coverage --cover-package=readability --cover-erase tests
-    $ nosetests-3.3 --with-coverage --cover-package=readability --cover-erase tests
+    $ nosetests-2.6 tests && nosetests-3.2 tests && nosetests-2.7 tests && nosetests-3.3 tests
 
 
 Usage
@@ -62,7 +65,7 @@ Command line
 
 .. code-block:: bash
 
-    $ readability http://wiki.python.org/moin/BeginnersGuide
+    $ breadability http://wiki.python.org/moin/BeginnersGuide
 
 Options
 ```````
@@ -84,7 +87,7 @@ Python API
 
     from __future__ import print_function
 
-    from readability.readable import Article
+    from breadability.readable import Article
 
 
     if __name__ == "__main__":
@@ -102,7 +105,7 @@ hopefully things are setup in a way that those can/will be added.
 Fortunately, I need this library for my tools:
 
 - https://bmark.us
-- http://readable.bmark.us
+- http://r.bmark.us
 
 so I really need this to be an active and improving project.
 

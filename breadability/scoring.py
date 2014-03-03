@@ -17,9 +17,9 @@ from .utils import normalize_whitespace
 # A series of sets of attributes we check to help in determining if a node is
 # a potential candidate or not.
 CLS_UNLIKELY = re.compile(
-    "combx|comment|community|disqus|extra|foot|header|menu|remark|rss|shoutbox|"
-    "sidebar|sponsor|ad-break|agegate|pagination|pager|perma|popup|tweet|"
-    "twitter|social|breadcrumb",
+    "combx|comment|community|disqus|extra|foot|header|menu|remark|rss|"
+    "shoutbox|sidebar|sponsor|ad-break|agegate|pagination|pager|perma|popup|"
+    "tweet|twitter|social|breadcrumb",
     re.IGNORECASE
 )
 CLS_MAYBE = re.compile(
@@ -32,12 +32,12 @@ CLS_WEIGHT_POSITIVE = re.compile(
 )
 CLS_WEIGHT_NEGATIVE = re.compile(
     "combx|comment|com-|contact|foot|footer|footnote|head|masthead|media|meta|"
-    "outbrain|promo|related|scroll|shoutbox|sidebar|sponsor|shopping|tags|tool|"
-    "widget",
+    "outbrain|promo|related|scroll|shoutbox|sidebar|sponsor|shopping|tags|"
+    "tool|widget",
     re.IGNORECASE
 )
 
-logger = logging.getLogger("readability")
+logger = logging.getLogger("breadability")
 
 
 def check_node_attributes(pattern, node, *attributes):
@@ -52,6 +52,7 @@ def check_node_attributes(pattern, node, *attributes):
 
     return False
 
+
 def generate_hash_id(node):
     """
     Generates a hash_id for the node in question.
@@ -60,7 +61,7 @@ def generate_hash_id(node):
     """
     try:
         content = tostring(node)
-    except Exception as e:
+    except Exception:
         logger.exception("Generating of hash failed")
         content = to_bytes(repr(node))
 
@@ -91,6 +92,11 @@ def get_link_density(node, node_text=None):
         return 0.0
 
     links_length = sum(map(_get_normalized_text_length, node.findall(".//a")))
+    # Give 50 bonus chars worth of length for each img.
+    # Tweaking this 50 down a notch should help if we hit false positives.
+    img_bonuses = 50 * len(node.findall(".//img"))
+    links_length = max(0, links_length - img_bonuses)
+
     return links_length / text_length
 
 
@@ -140,8 +146,8 @@ def score_candidates(nodes):
     for node in nodes:
         logger.debug("* Scoring candidate %s %r", node.tag, node.attrib)
 
-        # if the node has no parent it knows of
-        # then it ends up creating a body & html tag to parent the html fragment
+        # if the node has no parent it knows of then it ends up creating a
+        # body & html tag to parent the html fragment
         parent = node.getparent()
         if parent is None:
             logger.debug("Skipping candidate - parent node is 'None'.")
@@ -155,7 +161,9 @@ def score_candidates(nodes):
         # if paragraph is < `MIN_HIT_LENTH` characters don't even count it
         inner_text = node.text_content().strip()
         if len(inner_text) < MIN_HIT_LENTH:
-            logger.debug("Skipping candidate - inner text < %d characters.", MIN_HIT_LENTH)
+            logger.debug(
+                "Skipping candidate - inner text < %d characters.",
+                MIN_HIT_LENTH)
             continue
 
         # initialize readability data for the parent
@@ -178,7 +186,8 @@ def score_candidates(nodes):
             # subtract 0.5 points for each double quote within this paragraph
             double_quotes_count = inner_text.count('"')
             content_score += double_quotes_count * -0.5
-            logger.debug("Penalty points for %d double-quotes.", double_quotes_count)
+            logger.debug(
+                "Penalty points for %d double-quotes.", double_quotes_count)
 
             # for every 100 characters in this paragraph, add another point
             # up to 3 points
@@ -187,12 +196,14 @@ def score_candidates(nodes):
             logger.debug("Bonus points for length of text: %f", length_points)
 
         # add the score to the parent
-        logger.debug("Bonus points for parent %s %r with score %f: %f",
+        logger.debug(
+            "Bonus points for parent %s %r with score %f: %f",
             parent.tag, parent.attrib, candidates[parent].content_score,
             content_score)
         candidates[parent].content_score += content_score
         # the grand node gets half
-        logger.debug("Bonus points for grand %s %r with score %f: %f",
+        logger.debug(
+            "Bonus points for grand %s %r with score %f: %f",
             grand.tag, grand.attrib, candidates[grand].content_score,
             content_score / 2.0)
         candidates[grand].content_score += content_score / 2.0
@@ -204,7 +215,8 @@ def score_candidates(nodes):
     for candidate in candidates.values():
         adjustment = 1.0 - get_link_density(candidate.node)
         candidate.content_score *= adjustment
-        logger.debug("Link density adjustment for %s %r: %f",
+        logger.debug(
+            "Link density adjustment for %s %r: %f",
             candidate.node.tag, candidate.node.attrib, adjustment)
 
     return candidates
