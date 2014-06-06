@@ -1,9 +1,13 @@
 import sys
 
-from os.path import abspath, dirname, join
-from setuptools import setup, find_packages
+from os.path import (
+    abspath,
+    dirname,
+    join,
+)
+from setuptools import setup
 
-VERSION = "0.1.17"
+VERSION = "0.1.20"
 
 VERSION_SUFFIX = "%d.%d" % sys.version_info[:2]
 CURRENT_DIRECTORY = abspath(dirname(__file__))
@@ -16,14 +20,14 @@ with open(join(CURRENT_DIRECTORY, "README.rst")) as readme:
 
 install_requires = [
     "docopt>=0.6.1,<0.7",
-    "charade",
+    "chardet",
     "lxml>=2.0",
 ]
 tests_require = [
-    "nose-selecttests",
+    "pytest",
+    "pytest-cov",
     "coverage",
     "pylint",
-    "nose",
     "pep8",
 ]
 
@@ -78,7 +82,7 @@ setup(
         "Topic :: Text Processing :: Filters",
         "Topic :: Text Processing :: Markup :: HTML",
     ],
-    packages=find_packages(),
+    packages=['breadability', 'breadability.scripts'],
     include_package_data=True,
     zip_safe=False,
     install_requires=install_requires,
